@@ -36,19 +36,31 @@ namespace TourManagement.API
                         .Add("application/vnd.marvin.tour+json");
                     jsonOutputFormatter.SupportedMediaTypes
                         .Add("application/vnd.marvin.tourwithestimatedprofits+json");
+                    jsonOutputFormatter.SupportedMediaTypes
+                        .Add("application/vnd.marvin.tourwithshows+json");
+                    jsonOutputFormatter.SupportedMediaTypes
+                        .Add("application/vnd.marvin.tourwithestimatedprofitsandshows+json");
+                    jsonOutputFormatter.SupportedMediaTypes
+                        .Add("application/vnd.marvin.showcollection+json");
                 }
 
                 var jsonInputFormatter = setupAction.InputFormatters
                     .OfType<JsonInputFormatter>().FirstOrDefault();
 
-                if (jsonInputFormatter != null)
-                {
-                    jsonInputFormatter.SupportedMediaTypes
-                        .Add("application/vnd.marvin.tourforcreation+json");
+                if (jsonInputFormatter == null) return;
+                jsonInputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.marvin.tourforcreation+json");
 
-                    jsonInputFormatter.SupportedMediaTypes
-                        .Add("application/vnd.marvin.tourwithmanagerforcreation+json");
-                }
+                jsonInputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.marvin.tourwithmanagerforcreation+json");
+                jsonInputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.marvin.tourwithshowsforcreation+json");
+                jsonInputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.marvin.tourwithmanagerandshowsforcreation+json");
+                jsonInputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.marvin.showcollectionforcreation+json");
+                jsonInputFormatter.SupportedMediaTypes
+                    .Add("application/json-patch+json");
             })
             .AddJsonOptions(options =>
             {
@@ -112,6 +124,15 @@ namespace TourManagement.API
                 config.CreateMap<Entities.Show, Dtos.Show>();
                 config.CreateMap<Dtos.TourForCreation, Entities.Tour>();
                 config.CreateMap<Dtos.TourWithManagerForCreation, Entities.Tour>();
+                config.CreateMap<Entities.Tour, Dtos.TourWithShows>()
+                    .ForMember(d => d.Band, o => o.MapFrom(s => s.Band.Name));
+                config.CreateMap<Entities.Tour, Dtos.TourWithEstimatedProfitsAndShows>()
+                    .ForMember(d => d.Band, o => o.MapFrom(s => s.Band.Name));
+
+                config.CreateMap<Dtos.ShowsForCreation, Entities.Show>();
+                config.CreateMap<Dtos.TourWithShowsForCreation, Entities.Tour>();
+                config.CreateMap<Dtos.TourWithManagerAndShowsForCreation, Entities.Tour>();
+                config.CreateMap<Entities.Tour, Dtos.TourForUpdate>().ReverseMap();
 
             });
 

@@ -6,7 +6,9 @@ import { Band } from '../../shared/band.model';
 import { Subscription } from 'rxjs/Subscription';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common'
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { TourForUpdate } from '../shared/tour-for-update.model';
+import {compare} from 'fast-json-patch';
 
 
 @Component({
@@ -20,6 +22,7 @@ export class TourUpdateComponent implements OnInit, OnDestroy {
   private tour: Tour;
   private tourId: string;
   private sub: Subscription;
+  private originalTourForUpdate:TourForUpdate;
 
   constructor(private masterDataService: MasterDataService,
     private tourService: TourService,
@@ -30,7 +33,7 @@ export class TourUpdateComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // define the tourForm (with empty default values)
     this.tourForm = this.formBuilder.group({
-      title: [''],
+      title: ['',[Validators.required,Validators.maxLength(200)]],
       description: [''],
       startDate: [],
       endDate: []
@@ -45,7 +48,11 @@ export class TourUpdateComponent implements OnInit, OnDestroy {
         this.tourService.getTour(this.tourId)
           .subscribe(tour => {
             this.tour = tour;  
-            this.updateTourForm();     
+            this.updateTourForm();  
+            this.originalTourForUpdate = automapper.map(
+              'TourFormModel','TourForUpdate',
+              this.tourForm.value
+            );
           });
       }
     );
@@ -69,8 +76,20 @@ export class TourUpdateComponent implements OnInit, OnDestroy {
   }
 
   saveTour(): void {
-    if (this.tourForm.dirty) {       
-      // TODO
+    if (this.tourForm.dirty && this.tourForm.valid) {       
+      
+      let changedTourForUpdate = automapper.map(
+        'TourFormModel',
+        'TourForUpdate',
+        this.tourForm.value
+      );
+
+      let patchDocument = compare(this.originalTourForUpdate,changedTourForUpdate);
+      this.tourService.partiallyUpdateTour(this.tourId,patchDocument)
+      .subscribe(
+        () => {
+          this.router.navigateByUrl('/tours');
+        });
     } 
-}
+  }
 }

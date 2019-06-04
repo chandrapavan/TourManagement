@@ -8,6 +8,14 @@ import 'rxjs/add/operator/do';
 import { Tour } from './tour.model';
 import { BaseService } from '../../shared/base.service';
 import { TourWithEstimatedProfits } from './tour-with-estimated-profits.model';
+import { TourForCreation } from './tour-for-creation.model';
+import { TourWithManagerForCreation } from './tour-with-manager-for-creation.model';
+import { TourWithShows } from './tour-with-shows';
+import { TourWithEstimatedProfitsAndShows } from './tour-with-estimated-profits-and-shows';
+import { TourWithShowsForCreation } from './tour-with-shows-for-creation.model';
+import { TourWithManagerAndShowsForCreation } from './tour-with-manager-and-shows-for-creation.model';
+import { TourForUpdate } from './tour-for-update.model';
+import { Operation } from 'fast-json-patch';
 
 @Injectable()
 export class TourService extends BaseService {
@@ -26,5 +34,38 @@ export class TourService extends BaseService {
     getTourWithEstimatedProfits(tourId:string):Observable<TourWithEstimatedProfits>{
         return this.http.get<TourWithEstimatedProfits>(`${this.apiUrl}/tours/${tourId}`,
         {headers:{'Accept':'application/vnd.marvin.tourwithestimatedprofits+json'} });
+    }
+    getTourWithShows(tourId:string):Observable<TourWithShows>{
+        return this.http.get<TourWithShows>(`${this.apiUrl}/tours/${tourId}`,
+        {headers:{'Accept':'application/vnd.marvin.tourwithshows+json'}});
+    }
+
+    getTourWithEstimatedProfitsAndShows(tourId:string):Observable<TourWithEstimatedProfitsAndShows>{
+        return this.http.get<TourWithEstimatedProfitsAndShows>(`${this.apiUrl}/tours/${tourId}`,
+        {headers:{'Accept':'application/vnd.marvin.tourwithestimatedprofitsandshows+json'}});
+    }
+
+    addTour(tourtoAdd:TourForCreation):Observable<Tour>{
+        return this.http.post<Tour>(`${this.apiUrl}/tours`, tourtoAdd,
+        {headers:{'Content-Type':'application/json'}});
+    }
+
+    addTourWithManager(tourtoAdd:TourWithManagerForCreation):Observable<Tour>{
+        return this.http.post<Tour>(`${this.apiUrl}/tours`,tourtoAdd,
+        {headers:{'Content-Type':'application/vnd.marvin.tourwithmanagerforcreation+json'}});
+    }
+
+    addTourWithShows(tourtoAdd:TourWithShowsForCreation):Observable<Tour>{
+        return this.http.post<Tour>(`${this.apiUrl}/tours`, tourtoAdd,
+        {headers:{'Content-Type':'application/vnd.marvin.tourwithshowsforcreation+json'}});
+    }
+    addTourWithManagerAndShows(tourtoAdd:TourWithManagerAndShowsForCreation):Observable<Tour>{
+        return this.http.post<Tour>(`${this.apiUrl}/tours`,tourtoAdd,
+        {headers:{'Content-Type':'application/vnd.marvin.tourwithmanagerandshowsforcreation+json'}});
+    }
+
+    partiallyUpdateTour(tourId:string,patchDocument:Operation[]):Observable<any>{
+        return this.http.patch(`${this.apiUrl}/tours/${tourId}`,patchDocument,
+        {headers:{'Content-Type': 'application/json-patch+json'}});
     }
 }
